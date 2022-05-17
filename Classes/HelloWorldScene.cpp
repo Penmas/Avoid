@@ -29,7 +29,19 @@ bool HelloWorld::init()
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
     
-    return true;
+	spr = Sprite::create("cid_icon4.png");
+	spr->setPosition(visibleSize.width / 2, visibleSize.height / 2);
+	this->addChild(spr);
+
+
+	joystick = Joystick::create();
+	joystick->setMainChar(spr);
+	joystick->setSpeed(0.1f);
+	joystick->setLimitScreen(true);
+	joystick->setTouchShow(true);
+	this->addChild(joystick);
+
+	return true;
 }
 
 
