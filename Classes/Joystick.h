@@ -8,7 +8,8 @@ private:
 	Sprite* joystick_limit;		// Joystick - back Sprite
 	Sprite* joystick_control;	// Joystick - front Sprite
 	Sprite* mainChar;			// Joystick - character
-
+	Size visibleSize;
+	Vec2 origin;
 private:
 	Vec2 controlerPos;			// Joystick - controler position
 	Vec2 centerPos;				// Joystick - center position

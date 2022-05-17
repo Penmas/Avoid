@@ -37,12 +37,14 @@ bool Joystick::init()
 
 	// Joystick - Back Sprite (Limit)
 	joystick_limit = Sprite::create("joystick_limit_circle.png");
+	joystick_limit->setScale(2);
 	joystick_limit->setPosition(centerPos);
 	this->addChild(joystick_limit);
 
 
 	// Joystick - Front Sprite (Controler)
 	joystick_control = Sprite::create("joystick_control_circle.png");
+	joystick_control->setScale(2);
 	joystick_control->setPosition(centerPos);
 	this->addChild(joystick_control);
 
@@ -111,7 +113,7 @@ void Joystick::setTouchShow(bool check)
 	_isTouchShow = check;
 
 	if (_isTouchShow)
-		this->setVisible(false);
+		this->setVisible(true);
 }
 
 void Joystick::setLimitScreen(bool check)
@@ -131,7 +133,7 @@ void Joystick::onTouchesBegan(const std::vector<Touch*> &touches, Event* unused_
 		Touch* touch = it;
 		if (_isTouchShow)
 		{
-			centerPos = touch->getLocation();
+			centerPos = Vec2(125,125);
 			joystick_limit->setPosition(centerPos);
 			joystick_control->setPosition(centerPos);
 			this->setVisible(true);
@@ -199,6 +201,6 @@ void Joystick::onTouchesEnded(const std::vector<Touch*> &touches, Event* unused_
 		_isTouch = false;
 
 		if (_isTouchShow)
-			this->setVisible(false);
+			this->setVisible(true);
 	}
 }

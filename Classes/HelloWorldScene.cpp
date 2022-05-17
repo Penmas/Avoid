@@ -29,17 +29,35 @@ bool HelloWorld::init()
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
     
+	//플레이어 조작 인터페이스 배경
+	auto Back = Sprite::create("joystick_Inter_back.png");
+	Back->setAnchorPoint(Vec2(0.5, 0));
+	Back->setPosition(Vec2(visibleSize.width / 2, 0));
+	this->addChild(Back);
+
+
+
+	//플레이어 캐릭터
 	spr = Sprite::create("cid_icon4.png");
 	spr->setPosition(visibleSize.width / 2, visibleSize.height / 2);
 	this->addChild(spr);
 
 
+
+
+
+
+
+
+	//조이스틱
 	joystick = Joystick::create();
 	joystick->setMainChar(spr);
 	joystick->setSpeed(0.1f);
 	joystick->setLimitScreen(true);
 	joystick->setTouchShow(true);
 	this->addChild(joystick);
+
+
 
 	return true;
 }
