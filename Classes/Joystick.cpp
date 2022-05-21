@@ -77,6 +77,8 @@ void Joystick::update(float dt)
 
 		Vec2 charPos = mainChar->getPosition();
 
+
+
 		if (checkLimit())
 		{
 			if (0 < charPos.x + moveX * _speed && charPos.x + moveX * _speed < _winSize.width)
@@ -94,6 +96,13 @@ void Joystick::update(float dt)
 			charPos.x += moveX * _speed;
 			charPos.y += moveY * _speed;
 			mainChar->setPosition(charPos);
+		}
+
+
+		// 하단 조작부 영역 침범 방지
+		if (mainChar->getPosition().y < 300)
+		{
+			mainChar->setPosition(mainChar->getPosition().x, 300);
 		}
 	}
 }
