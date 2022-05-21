@@ -48,7 +48,6 @@ bool HelloWorld::init()
 
 
 
-
 	//Á¶ÀÌ½ºÆ½
 	joystick = Joystick::create();
 	joystick->setMainChar(spr);
