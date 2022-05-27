@@ -28,6 +28,11 @@ public:
     // implement the "static create()" method manually
     CREATE_FUNC(HelloWorld);
 
+	void myTick(float f); 
+	cocos2d::Sprite* pEnemy;
+	cocos2d::Sprite* pBullet; 
+	void createBullet();
+
 
 };
 
