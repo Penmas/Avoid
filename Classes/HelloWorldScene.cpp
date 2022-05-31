@@ -30,7 +30,8 @@ bool HelloWorld::init()
 
     auto visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
-
+	srand(time(NULL));
+	peas.clear();
     
 	//플레이어 조작 인터페이스 배경
 	auto Back = Sprite::create("joystick_Inter_back.png");
@@ -61,13 +62,21 @@ bool HelloWorld::init()
 	//조이스틱
 	joystick = Joystick::create();
 	joystick->setMainChar(spr);
-	joystick->setSpeed(0.1f);
+	joystick->setSpeed(0.18f);
 	joystick->setLimitScreen(true);
 	joystick->setTouchShow(true);
 	joystick->setZOrder(3);
 	this->addChild(joystick);
 
+	//시간초재기
+	this->schedule(schedule_selector(HelloWorld::callEveryFrame), 1.0f);
 
+	//타이머
+	time_label = Label::createWithSystemFont(" 0 ", "", 40);
+	time_label->setPosition(Vec2(visibleSize.width / 2, visibleSize.height - 30)); //화면중앙상단
+	time_label->setColor(Color3B::RED);
+	this->addChild(time_label);
+	mytime = 0;
 
 
 	return true;
@@ -93,40 +102,129 @@ void HelloWorld::menuCloseCallback(Ref* pSender)
 
 void HelloWorld::createBullet()
 { 
+	auto visibleSize = Director::getInstance()->getVisibleSize();
+	Vec2 origin = Director::getInstance()->getVisibleOrigin();
+
 	auto player = (Sprite*)getChildByTag(PLAYER);
-	srand(time(NULL));
-	int pBulletX = rand() % ((int)visibleSize.width - 10);
-	int pBulletY = rand() % ((int)visibleSize.height + 500);
+	//srand(time(NULL));
+
+	int BulletPos = (rand() % 4) + 1;
+	int pBulletX, pBulletY;
+
+	//총알 나오는 위치 설정
+	if (BulletPos == 1)	//좌측
+	{
+		//srand(time(NULL));
+		pBulletX = -10;
+		pBulletY = (rand() % 650) + 300;
+		//pBulletY = (rand() % ((int)visibleSize.height - 290)) + 300;
+		log("좌측");
+	}
+	else if (BulletPos == 2)//하단
+	{
+		//srand(time(NULL));
+		//pBulletX = (rand() % ((int)visibleSize.width + 10)) -10;
+		pBulletX = (rand() % 520) - 10;
+		pBulletY = 250;
+		log("하단");
+	}
+	else if (BulletPos == 3)//우측
+	{
+		//srand(time(NULL));
+		pBulletX = visibleSize.width + 10;
+		//pBulletY = (rand() % ((int)visibleSize.height - 290)) + 300;
+		pBulletY = (rand() % 650) + 300;
+		log("우측");
+	}
+	else if (BulletPos == 4)//상단
+	{
+		//srand(time(NULL));
+		//pBulletX = (rand() % ((int)visibleSize.width + 10)) - 10;
+		pBulletX = (rand() % 520) - 10;
+		pBulletY = visibleSize.height + 10;
+		log("상단");
+	}
+
+
 
 	pBullet = Sprite::create("Bullet.png");
 	pBullet->setPosition(Vec2(pBulletX, pBulletY));
-	pBullet->setScale(0.5);
+	pBullet->setScale(0.2);
 	this->addChild(pBullet);
-	auto myActionForward = MoveBy::create(2, Vec2((player->getPosition().x - pBulletX) * 2, (player->getPosition().y - pBulletY) * 2));
+	//auto myActionForward = MoveBy::create(2000, Vec2((player->getPosition().x - pBulletX)*1000, (player->getPosition().y - pBulletY)*1000));
+
+
+	//총알 타겟 위치 설정
+
+
+
+
+	float vecX = (player->getPosition().x - pBulletX);
+	float vecY = (player->getPosition().y - pBulletY);
+	float time = sqrt((vecX * vecX) + (vecY * vecY));
+
+
+
+	auto myActionForward = MoveBy::create(time * 0.03f
+		, Vec2((player->getPosition().x - pBulletX) * 10, (player->getPosition().y - pBulletY) * 10));
 	auto myAction = Sequence::create(Place::create(Vec2(pBulletX, pBulletY)), myActionForward, nullptr);
 	auto rep = RepeatForever::create(myAction);
 	pBullet->runAction(rep);
+
+	peas.pushBack(pBullet);
 }
 
 //스케쥴러콜백함수
 void HelloWorld::myTick(float f) 
 {
-	if (pBullet== nullptr) 
+	auto player = (Sprite*)getChildByTag(PLAYER);
+	if (OutBullet < BulletNum)
 	{
 		//log("pBulletis null!");
 		this->createBullet();		//총알없으면생성
-		return;
+		OutBullet++;
+		//return;
+
 	}
-	
-	if (pBullet->getBoundingBox().intersectsRect(spr->getBoundingBox())) 
+
+
+	//총알 바운딩박스 인식 & 총알 범위 벗어나면 제거
+	Rect location = player->getBoundingBox();
+
+	for (int i = 0; i < peas.size(); i++)
 	{
-		//충돌하면
-		// 충돌범위를조정해보자(확실하게충돌한경우로조정)
-		// 충돌하면점수를올려레이블로출력해주자
-		log("GameOver");
-		pBullet->removeFromParentAndCleanup(true);
-		//총알제거
-		pBullet= nullptr;		//일정시간사용이없기전까지객체정보가남아있으므로반드시nullptr로처리해야새로생성이될수있음
-		// this->removeChild(pBullet); // (Cleanup =true) default
+		auto spr = (Sprite*)peas.at(i);
+		Rect rect = spr->getBoundingBox();
+		float BulletPosX = spr->getPosition().x;
+		float BulletPosY = spr->getPosition().y;
+
+		if (rect.intersectsRect(location))
+		{
+			this->removeChild(spr);
+			peas.eraseObject(spr);
+			OutBullet--;
+			log("게임 오버");
+		}
+
+		if (BulletPosX >= 800 || BulletPosX <= -150 || BulletPosY >= 1000 || BulletPosY <= 200)
+		{
+			this->removeChild(spr);
+			peas.eraseObject(spr);
+			//spr->removeFromParentAndCleanup(true);
+			OutBullet--;
+			log("총알 범위 벗어남");
+		}
+	}
+}
+
+void HelloWorld::callEveryFrame(float f)
+{
+	mytime++;
+	//log("시간 : %d", nNum);
+	time_label->setString(StringUtils::format(" %d ", mytime));
+
+	if ((mytime % 3) == 0)
+	{
+		BulletNum++;
 	}
 }

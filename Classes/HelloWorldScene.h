@@ -16,6 +16,12 @@ class HelloWorld : public cocos2d::Scene
 	Vec2 origin;
 	Sprite* spr;
 	Joystick* joystick;
+	int nNum;
+	int mytime;
+	int BulletNum;
+	int OutBullet;
+	int pBulletPosX;
+	int pBulletPosY;
 
 public:
     static cocos2d::Scene* createScene();
@@ -28,11 +34,15 @@ public:
     // implement the "static create()" method manually
     CREATE_FUNC(HelloWorld);
 
-	void myTick(float f); 
+	void myTick(float delta);
+	void callEveryFrame(float f);
+
 	cocos2d::Sprite* pEnemy;
-	cocos2d::Sprite* pBullet; 
+	cocos2d::Sprite* pBullet;
+	cocos2d::Label* time_label;
 	void createBullet();
 
+	Vector<Sprite*>peas;
 
 };
 
