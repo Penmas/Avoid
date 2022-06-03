@@ -16,12 +16,20 @@ class HelloWorld : public cocos2d::Scene
 	Vec2 origin;
 	Sprite* spr;
 	Joystick* joystick;
+
 	int nNum;
 	int mytime;
+
 	int BulletNum;
 	int OutBullet;
 	int pBulletPosX;
 	int pBulletPosY;
+
+	bool isGameOver;
+	bool isSkillTrue;
+	bool isSkillCollTime;
+	int SkillCool;
+	int SkillDuration;
 
 public:
     static cocos2d::Scene* createScene();
@@ -37,10 +45,14 @@ public:
 	void myTick(float delta);
 	void callEveryFrame(float f);
 
+
 	cocos2d::Sprite* pEnemy;
 	cocos2d::Sprite* pBullet;
 	cocos2d::Label* time_label;
 	void createBullet();
+	void GameOverCheck();
+
+	void SkillCallBack(cocos2d::Ref* pSender);
 
 	Vector<Sprite*>peas;
 

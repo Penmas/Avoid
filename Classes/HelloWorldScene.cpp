@@ -78,6 +78,16 @@ bool HelloWorld::init()
 	this->addChild(time_label);
 	mytime = 0;
 
+	//스킬
+	auto SkillButton = MenuItemImage::create("Skill.png", "Skill.png", "Skill.png", CC_CALLBACK_1(HelloWorld::SkillCallBack, this));
+	SkillButton->setAnchorPoint(Vec2(0.5, 0.5));
+	SkillButton->setScale(2);
+	auto Skill = Menu::create(SkillButton, NULL);
+	Skill->alignItemsVertically();
+	Skill->setPosition(Vec2(visibleSize.width - 180, 130));
+	Skill->setZOrder(3);
+	this->addChild(Skill);
+
 
 	return true;
 }
@@ -85,28 +95,28 @@ bool HelloWorld::init()
 
 void HelloWorld::menuCloseCallback(Ref* pSender)
 {
-    //Close the cocos2d-x game scene and quit the application
-    Director::getInstance()->end();
+	//Close the cocos2d-x game scene and quit the application
+	Director::getInstance()->end();
 
-    #if (CC_TARGET_PLATFORM == CC_PLATFORM_IOS)
-    exit(0);
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_IOS)
+	exit(0);
 #endif
 
-    /*To navigate back to native iOS screen(if present) without quitting the application  ,do not use Director::getInstance()->end() and exit(0) as given above,instead trigger a custom event created in RootViewController.mm as below*/
+	/*To navigate back to native iOS screen(if present) without quitting the application  ,do not use Director::getInstance()->end() and exit(0) as given above,instead trigger a custom event created in RootViewController.mm as below*/
 
-    //EventCustom customEndEvent("game_scene_close_event");
-    //_eventDispatcher->dispatchEvent(&customEndEvent);
+	//EventCustom customEndEvent("game_scene_close_event");
+	//_eventDispatcher->dispatchEvent(&customEndEvent);
 
 
 }
 
 void HelloWorld::createBullet()
-{ 
+{
 	auto visibleSize = Director::getInstance()->getVisibleSize();
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
 	auto player = (Sprite*)getChildByTag(PLAYER);
-	//srand(time(NULL));
+
 
 	int BulletPos = (rand() % 4) + 1;
 	int pBulletX, pBulletY;
@@ -154,19 +164,15 @@ void HelloWorld::createBullet()
 	//auto myActionForward = MoveBy::create(2000, Vec2((player->getPosition().x - pBulletX)*1000, (player->getPosition().y - pBulletY)*1000));
 
 
-	//총알 타겟 위치 설정
-
-
-
-
+	//총알 타겟 위치 설정	
 	float vecX = (player->getPosition().x - pBulletX);
 	float vecY = (player->getPosition().y - pBulletY);
 	float time = sqrt((vecX * vecX) + (vecY * vecY));
 
 
 
-	auto myActionForward = MoveBy::create(time * 0.03f
-		, Vec2((player->getPosition().x - pBulletX) * 10, (player->getPosition().y - pBulletY) * 10));
+	auto myActionForward = MoveBy::create(time * 3.0f
+		, Vec2((player->getPosition().x - pBulletX) * 1000, (player->getPosition().y - pBulletY) * 1000));
 	auto myAction = Sequence::create(Place::create(Vec2(pBulletX, pBulletY)), myActionForward, nullptr);
 	auto rep = RepeatForever::create(myAction);
 	pBullet->runAction(rep);
@@ -175,8 +181,9 @@ void HelloWorld::createBullet()
 }
 
 //스케쥴러콜백함수
-void HelloWorld::myTick(float f) 
+void HelloWorld::myTick(float f)
 {
+
 	auto player = (Sprite*)getChildByTag(PLAYER);
 	if (OutBullet < BulletNum)
 	{
@@ -198,12 +205,14 @@ void HelloWorld::myTick(float f)
 		float BulletPosX = spr->getPosition().x;
 		float BulletPosY = spr->getPosition().y;
 
-		if (rect.intersectsRect(location))
+		if (rect.intersectsRect(location) && !isSkillTrue)
 		{
 			this->removeChild(spr);
 			peas.eraseObject(spr);
 			OutBullet--;
+			GameOverCheck();
 			log("게임 오버");
+			isGameOver = true;
 		}
 
 		if (BulletPosX >= 800 || BulletPosX <= -150 || BulletPosY >= 1000 || BulletPosY <= 200)
@@ -214,8 +223,13 @@ void HelloWorld::myTick(float f)
 			OutBullet--;
 			log("총알 범위 벗어남");
 		}
+
+
+
 	}
+
 }
+
 
 void HelloWorld::callEveryFrame(float f)
 {
@@ -227,4 +241,40 @@ void HelloWorld::callEveryFrame(float f)
 	{
 		BulletNum++;
 	}
+
+	if (isSkillCollTime)
+	{
+		SkillCool++;
+		SkillDuration++;
+
+		if (SkillCool >= 3)
+		{
+			isSkillTrue = false;
+			SkillCool = 0;
+			log("스킬 꺼짐");
+		}
+
+		if (SkillCool >= 10)
+		{
+			isSkillCollTime = false;
+			log("스킬 쿨 초기화");
+		}
+	}
+}
+
+void HelloWorld::GameOverCheck()
+{
+	isGameOver = true;
+}
+
+
+void HelloWorld::SkillCallBack(Ref* pSender)
+{
+	if (!isSkillCollTime)
+	{
+		isSkillTrue = true;
+		isSkillCollTime = true;
+	}
+
+	log("스킬 사용");
 }
