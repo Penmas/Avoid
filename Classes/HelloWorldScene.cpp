@@ -1,4 +1,5 @@
 #include "HelloWorldScene.h"
+#include "GameOverScene.h"
 #include "SimpleAudioEngine.h"
 
 
@@ -8,31 +9,31 @@ USING_NS_CC;
 
 Scene* HelloWorld::createScene()
 {
-    return HelloWorld::create();
+	return HelloWorld::create();
 }
 
 // Print useful error message instead of segfaulting when files are not there.
 static void problemLoading(const char* filename)
 {
-    printf("Error while loading: %s\n", filename);
-    printf("Depending on how you compiled you might have to add 'Resources/' in front of filenames in HelloWorldScene.cpp\n");
+	printf("Error while loading: %s\n", filename);
+	printf("Depending on how you compiled you might have to add 'Resources/' in front of filenames in HelloWorldScene.cpp\n");
 }
 
 // on "init" you need to initialize your instance
 bool HelloWorld::init()
 {
-    //////////////////////////////
-    // 1. super init first
-    if ( !Scene::init() )
-    {
-        return false;
-    }
+	//////////////////////////////
+	// 1. super init first
+	if (!Scene::init())
+	{
+		return false;
+	}
 
-    auto visibleSize = Director::getInstance()->getVisibleSize();
-    Vec2 origin = Director::getInstance()->getVisibleOrigin();
+	auto visibleSize = Director::getInstance()->getVisibleSize();
+	Vec2 origin = Director::getInstance()->getVisibleOrigin();
 	srand(time(NULL));
 	peas.clear();
-    
+
 	//플레이어 조작 인터페이스 배경
 	auto Back = Sprite::create("joystick_Inter_back.png");
 	Back->setAnchorPoint(Vec2(0.5, 0));
@@ -41,12 +42,15 @@ bool HelloWorld::init()
 	Back->setZOrder(2);
 	this->addChild(Back);
 
+	//시간초재기
+	this->schedule(schedule_selector(HelloWorld::callEveryFrame), 1.0f);
 
 
 	//플레이어 캐릭터
 	spr = Sprite::create("cid_icon4.png");
 	spr->setPosition(visibleSize.width / 2, visibleSize.height / 2);
 	spr->setTag(PLAYER);
+	spr->setScale(0.8f);
 	spr->setZOrder(1);
 	this->addChild(spr);
 
@@ -67,9 +71,6 @@ bool HelloWorld::init()
 	joystick->setTouchShow(true);
 	joystick->setZOrder(3);
 	this->addChild(joystick);
-
-	//시간초재기
-	this->schedule(schedule_selector(HelloWorld::callEveryFrame), 1.0f);
 
 	//타이머
 	time_label = Label::createWithSystemFont(" 0 ", "", 40);
@@ -228,6 +229,11 @@ void HelloWorld::myTick(float f)
 
 	}
 
+	if (isGameOver)
+	{
+		changeGameOverScene();
+	}
+
 }
 
 
@@ -264,7 +270,7 @@ void HelloWorld::callEveryFrame(float f)
 
 void HelloWorld::GameOverCheck()
 {
-	isGameOver = true;
+
 }
 
 
@@ -277,4 +283,13 @@ void HelloWorld::SkillCallBack(Ref* pSender)
 	}
 
 	log("스킬 사용");
+}
+
+void HelloWorld::changeGameOverScene()
+{
+	ThisScore = mytime;
+	UserDefault::getInstance()->setIntegerForKey("THISSCORE", ThisScore);
+	UserDefault::getInstance()->flush();
+	Director::getInstance()->replaceScene(GameOverScene::createScene());
+	log("게임오버 씬으로 이동");
 }

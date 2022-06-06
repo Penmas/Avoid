@@ -18,7 +18,7 @@ class HelloWorld : public cocos2d::Scene
 	Joystick* joystick;
 
 	int nNum;
-	int mytime;
+
 
 	int BulletNum;
 	int OutBullet;
@@ -30,21 +30,25 @@ class HelloWorld : public cocos2d::Scene
 	bool isSkillCollTime;
 	int SkillCool;
 	int SkillDuration;
-
+	//float PlayerPosX;
+	//float PlayerPosY;
 public:
-    static cocos2d::Scene* createScene();
 
-    virtual bool init();
-    
-    // a selector callback
-    void menuCloseCallback(cocos2d::Ref* pSender);
-    
-    // implement the "static create()" method manually
-    CREATE_FUNC(HelloWorld);
+
+	static cocos2d::Scene* createScene();
+	int mytime;
+	int highscore;
+	int ThisScore;
+	virtual bool init();
+
+	// a selector callback
+	void menuCloseCallback(cocos2d::Ref* pSender);
+
+	// implement the "static create()" method manually
+	CREATE_FUNC(HelloWorld);
 
 	void myTick(float delta);
 	void callEveryFrame(float f);
-
 
 	cocos2d::Sprite* pEnemy;
 	cocos2d::Sprite* pBullet;
@@ -53,8 +57,10 @@ public:
 	void GameOverCheck();
 
 	void SkillCallBack(cocos2d::Ref* pSender);
-
 	Vector<Sprite*>peas;
+
+	void changeGameOverScene();
+
 
 };
 
