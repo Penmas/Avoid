@@ -27,7 +27,7 @@ class HelloWorld : public cocos2d::Scene
 
 	bool isGameOver;
 	bool isSkillTrue;
-	bool isSkillCollTime;
+	bool isSkillCoolTime;
 	int SkillCool;
 	int SkillDuration;
 	//float PlayerPosX;

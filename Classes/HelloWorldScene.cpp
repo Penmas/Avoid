@@ -6,6 +6,7 @@
 USING_NS_CC;
 
 #define PLAYER	0
+#define SHIELD	2
 
 Scene* HelloWorld::createScene()
 {
@@ -54,6 +55,7 @@ bool HelloWorld::init()
 	spr->setZOrder(1);
 	this->addChild(spr);
 
+	
 
 	//ÃÑ¾Ë
 	this->createBullet();
@@ -248,21 +250,22 @@ void HelloWorld::callEveryFrame(float f)
 		BulletNum++;
 	}
 
-	if (isSkillCollTime)
+	if (isSkillCoolTime)
 	{
 		SkillCool++;
 		SkillDuration++;
 
-		if (SkillCool >= 3)
+		if (SkillCool >= 3) // Áö¼Ó½Ã°£
 		{
 			isSkillTrue = false;
-			SkillCool = 0;
 			log("½ºÅ³ ²¨Áü");
+			spr->removeChildByTag(SHIELD);
 		}
 
 		if (SkillCool >= 10)
 		{
-			isSkillCollTime = false;
+			SkillCool = 0;
+			isSkillCoolTime = false;
 			log("½ºÅ³ Äð ÃÊ±âÈ­");
 		}
 	}
@@ -276,10 +279,17 @@ void HelloWorld::GameOverCheck()
 
 void HelloWorld::SkillCallBack(Ref* pSender)
 {
-	if (!isSkillCollTime)
+	if (!isSkillCoolTime)
 	{
 		isSkillTrue = true;
-		isSkillCollTime = true;
+		isSkillCoolTime = true;
+		auto shiledEffect = Sprite::create("shield.png");
+		shiledEffect->setAnchorPoint(Vec2(0.5f, 0.5f));
+		shiledEffect->setPosition(10, 10);
+		shiledEffect->setTag(SHIELD);
+		shiledEffect->setScale(0.8f);
+		shiledEffect->setZOrder(2);
+		spr->addChild(shiledEffect);
 	}
 
 	log("½ºÅ³ »ç¿ë");
