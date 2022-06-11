@@ -285,9 +285,9 @@ void HelloWorld::SkillCallBack(Ref* pSender)
 		isSkillCoolTime = true;
 		auto shiledEffect = Sprite::create("shield.png");
 		shiledEffect->setAnchorPoint(Vec2(0.5f, 0.5f));
-		shiledEffect->setPosition(10, 10);
+		shiledEffect->setPosition(21.5, 15);
 		shiledEffect->setTag(SHIELD);
-		shiledEffect->setScale(0.8f);
+		shiledEffect->setScale(1.0f);
 		shiledEffect->setZOrder(2);
 		spr->addChild(shiledEffect);
 	}
