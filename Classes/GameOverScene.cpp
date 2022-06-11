@@ -52,9 +52,58 @@ bool GameOverScene::init()
 	auto TimeLable = Label::createWithSystemFont(" 0 ", "", 40);
 	
 	thisGameTime = UserDefault::getInstance()->getIntegerForKey("THISSCORE");
-	TimeLable->setString(StringUtils::format(" %d " ,thisGameTime));
+
+	if (thisGameTime < 10)
+	{
+		TimeLable->setString(StringUtils::format("00:0%d", thisGameTime));
+	}
+	else if (thisGameTime < 60)
+	{
+		TimeLable->setString(StringUtils::format("00:%d", thisGameTime));
+	}
+	else if (thisGameTime < 600 && (thisGameTime % 60 < 10))
+	{
+		TimeLable->setString(StringUtils::format("0%d:0%d", thisGameTime / 60, thisGameTime % 60));
+	}
+	else if (thisGameTime < 600 && (thisGameTime % 60 > 10))
+	{
+		TimeLable->setString(StringUtils::format("0%d:%d", thisGameTime / 60, thisGameTime % 60));
+	}
+	else if (thisGameTime >= 600 && (thisGameTime % 60 > 10))
+	{
+		TimeLable->setString(StringUtils::format("%d:%d", thisGameTime / 60, thisGameTime % 60));
+	}
+	else if (thisGameTime >= 600 && (thisGameTime % 60 < 10))
+	{
+		TimeLable->setString(StringUtils::format("0%d:0%d", thisGameTime / 60, thisGameTime % 60));
+	}
+	//TimeLable->setString(StringUtils::format("%d " ,thisGameTime));
 	TimeLable->setPosition(Vec2(visibleSize.width / 2, visibleSize.height / 2));
 	this->addChild(TimeLable);
+
+	Score[0] = UserDefault::getInstance()->getIntegerForKey("SCORE1ST");
+	Score[1] = UserDefault::getInstance()->getIntegerForKey("SCORE2ND");
+	Score[2] = UserDefault::getInstance()->getIntegerForKey("SCORE3RD");
+	Score[3] = UserDefault::getInstance()->getIntegerForKey("SCORE4TH");
+	Score[4] = UserDefault::getInstance()->getIntegerForKey("SCORE5TH");
+	for (int i = 0; i < 5; i++)
+	{
+		for (int j = 0; j < 5; j++)
+		{
+			if (Score[j] < thisGameTime)
+			{
+				ScoreSpace = Score[j];
+				Score[j] = thisGameTime;
+				thisGameTime = ScoreSpace;
+			}
+		}
+	}
+	UserDefault::getInstance()->setIntegerForKey("SCORE1ST", Score[0]);
+	UserDefault::getInstance()->setIntegerForKey("SCORE2ND", Score[1]);
+	UserDefault::getInstance()->setIntegerForKey("SCORE3RD", Score[2]);
+	UserDefault::getInstance()->setIntegerForKey("SCORE4TH", Score[3]);
+	UserDefault::getInstance()->setIntegerForKey("SCORE5TH", Score[4]);
+	UserDefault::getInstance()->flush();
 	return true;
 }
 

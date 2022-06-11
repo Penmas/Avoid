@@ -14,6 +14,8 @@ class GameOverScene : public cocos2d::Scene
 	Size visibleSize;
 	Vec2 origin;
 	int thisGameTime;
+    int Score[5] = { 0, };
+    int ScoreSpace;
 
 public:
 
