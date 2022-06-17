@@ -30,6 +30,8 @@ class HelloWorld : public cocos2d::Scene
 	bool isSkillCoolTime;
 	int SkillCool;
 	int SkillDuration;
+
+	int GameOverWaitingTime;
 	//float PlayerPosX;
 	//float PlayerPosY;
 public:
@@ -40,7 +42,8 @@ public:
 	int highscore;
 	int ThisScore;
 	virtual bool init();
-
+	int audio1;
+	int GameOverAudio1;
 	// a selector callback
 	void menuCloseCallback(cocos2d::Ref* pSender);
 
@@ -53,6 +56,8 @@ public:
 	cocos2d::Sprite* pEnemy;
 	cocos2d::Sprite* pBullet;
 	cocos2d::Label* time_label;
+
+	//ocos2d::Sprite* Skill;
 	void createBullet();
 	void GameOverCheck();
 

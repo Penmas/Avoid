@@ -14,11 +14,11 @@ class GameOverScene : public cocos2d::Scene
 	Size visibleSize;
 	Vec2 origin;
 	int thisGameTime;
-    int Score[5] = { 0, };
-    int ScoreSpace;
+	int Score[5] = { 0, };
+	int ScoreSpace;
 
 public:
-
+	int audio2;
 	
     static cocos2d::Scene* createScene();
 

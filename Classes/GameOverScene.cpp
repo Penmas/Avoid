@@ -1,10 +1,11 @@
 #include "GameOverScene.h"
 #include "HelloWorldScene.h"
 #include "MenuScene.h"
+#include "audio/include/AudioEngine.h"
 
 
 USING_NS_CC;
-
+using namespace experimental;
 #define PLAYER	0
 
 Scene* GameOverScene::createScene()
@@ -49,7 +50,7 @@ bool GameOverScene::init()
 	this->addChild(menu);
 
 	
-	auto TimeLable = Label::createWithSystemFont(" 0 ", "", 40);
+	auto TimeLable = Label::createWithTTF(" 0 ", "fonts/NANUMSQUAREROUNDEB.TTF", 50);
 	
 	thisGameTime = UserDefault::getInstance()->getIntegerForKey("THISSCORE");
 
@@ -61,13 +62,13 @@ bool GameOverScene::init()
 	{
 		TimeLable->setString(StringUtils::format("00:%d", thisGameTime));
 	}
-	else if (thisGameTime < 600 && (thisGameTime % 60 < 10))
+	else if (thisGameTime < 600 && (thisGameTime % 60 < 10) )
 	{
-		TimeLable->setString(StringUtils::format("0%d:0%d", thisGameTime / 60, thisGameTime % 60));
+		TimeLable->setString(StringUtils::format("0%d:0%d", thisGameTime / 60, thisGameTime%60));
 	}
 	else if (thisGameTime < 600 && (thisGameTime % 60 > 10))
 	{
-		TimeLable->setString(StringUtils::format("0%d:%d", thisGameTime / 60, thisGameTime % 60));
+		TimeLable->setString(StringUtils::format("0%d:%d", thisGameTime / 60, thisGameTime%60));
 	}
 	else if (thisGameTime >= 600 && (thisGameTime % 60 > 10))
 	{
@@ -78,7 +79,7 @@ bool GameOverScene::init()
 		TimeLable->setString(StringUtils::format("0%d:0%d", thisGameTime / 60, thisGameTime % 60));
 	}
 	//TimeLable->setString(StringUtils::format("%d " ,thisGameTime));
-	TimeLable->setPosition(Vec2(visibleSize.width / 2, visibleSize.height / 2));
+	TimeLable->setPosition(Vec2(visibleSize.width / 2, (visibleSize.height / 2)+30));
 	this->addChild(TimeLable);
 
 	Score[0] = UserDefault::getInstance()->getIntegerForKey("SCORE1ST");
@@ -86,6 +87,20 @@ bool GameOverScene::init()
 	Score[2] = UserDefault::getInstance()->getIntegerForKey("SCORE3RD");
 	Score[3] = UserDefault::getInstance()->getIntegerForKey("SCORE4TH");
 	Score[4] = UserDefault::getInstance()->getIntegerForKey("SCORE5TH");
+
+	auto HighScoreTitle = Label::createWithTTF(" 최고기록 갱신 ", "fonts/NANUMSQUAREROUNDEB.TTF", 50);
+	auto ScoreTitle = Label::createWithTTF(" 현재 기록 ", "fonts/NANUMSQUAREROUNDEB.TTF", 50);
+	HighScoreTitle->setPosition(Vec2(visibleSize.width / 2, (visibleSize.height / 2) + 80));
+	ScoreTitle->setPosition(Vec2(visibleSize.width / 2, (visibleSize.height / 2) + 80));
+	if (thisGameTime > Score[0])
+	{
+		this->addChild(HighScoreTitle);
+	}
+	else
+	{
+		this->addChild(ScoreTitle);
+	}
+
 	for (int i = 0; i < 5; i++)
 	{
 		for (int j = 0; j < 5; j++)
@@ -104,6 +119,8 @@ bool GameOverScene::init()
 	UserDefault::getInstance()->setIntegerForKey("SCORE4TH", Score[3]);
 	UserDefault::getInstance()->setIntegerForKey("SCORE5TH", Score[4]);
 	UserDefault::getInstance()->flush();
+
+
 	return true;
 }
 

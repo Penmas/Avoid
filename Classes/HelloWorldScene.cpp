@@ -1,12 +1,17 @@
 #include "HelloWorldScene.h"
 #include "GameOverScene.h"
-#include "SimpleAudioEngine.h"
+#include "audio/include/AudioEngine.h"
 
 
 USING_NS_CC;
+using namespace experimental;
+#define PLAYER		0
+#define SHIELD		2
+#define COOL		3
+#define COOLING		4
+#define SKILL		5
+#define PARTICLE	10
 
-#define PLAYER	0
-#define SHIELD	2
 
 Scene* HelloWorld::createScene()
 {
@@ -30,7 +35,7 @@ bool HelloWorld::init()
 		return false;
 	}
 
-	auto visibleSize = Director::getInstance()->getVisibleSize();
+	visibleSize = Director::getInstance()->getVisibleSize();
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
 	srand(time(NULL));
 	peas.clear();
@@ -55,7 +60,12 @@ bool HelloWorld::init()
 	spr->setZOrder(1);
 	this->addChild(spr);
 
-	
+	//게임오버 이펙트
+	auto particle = ParticleExplosion::create();
+	if (isGameOver)
+	{
+		this->addChild(particle);
+	}
 
 	//총알
 	this->createBullet();
@@ -75,9 +85,10 @@ bool HelloWorld::init()
 	this->addChild(joystick);
 
 	//타이머
-	time_label = Label::createWithSystemFont(" 0 ", "", 40);
+	time_label = Label::createWithTTF(" 00:00 ", "fonts/NANUMSQUAREROUNDEB.TTF", 40);
 	time_label->setPosition(Vec2(visibleSize.width / 2, visibleSize.height - 30)); //화면중앙상단
 	time_label->setColor(Color3B::RED);
+
 	this->addChild(time_label);
 	mytime = 0;
 
@@ -89,8 +100,15 @@ bool HelloWorld::init()
 	Skill->alignItemsVertically();
 	Skill->setPosition(Vec2(visibleSize.width - 180, 130));
 	Skill->setZOrder(3);
+	Skill->setTag(SKILL);
 	this->addChild(Skill);
 
+
+	//auto listener = EventListenerTouchOneByOne::create(); //이벤트리스너생성
+	//listener->setSwallowTouches(true);
+	//listener->onTouchBegan= CC_CALLBACK_2(HelloWorld::onTouchBegan, this);//필요한콜백함수등록
+	//_eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
+	audio1 = AudioEngine::play2d("sound/InPlay.mp3", true, 0.2f); 
 
 	return true;
 }
@@ -208,14 +226,20 @@ void HelloWorld::myTick(float f)
 		float BulletPosX = spr->getPosition().x;
 		float BulletPosY = spr->getPosition().y;
 
-		if (rect.intersectsRect(location) && !isSkillTrue)
+		if (rect.intersectsRect(location))
 		{
 			this->removeChild(spr);
 			peas.eraseObject(spr);
 			OutBullet--;
-			GameOverCheck();
-			log("게임 오버");
-			isGameOver = true;
+			if (!isSkillTrue)
+			{
+				log("게임 오버");
+				GameOverAudio1 = AudioEngine::play2d("sound/GameOver.mp3", false, 0.1f);
+				AudioEngine::stop(audio1);
+				isGameOver = true;
+				changeGameOverScene();
+			}
+			
 		}
 
 		if (BulletPosX >= 800 || BulletPosX <= -150 || BulletPosY >= 1000 || BulletPosY <= 200)
@@ -231,10 +255,6 @@ void HelloWorld::myTick(float f)
 
 	}
 
-	if (isGameOver)
-	{
-		changeGameOverScene();
-	}
 
 }
 
@@ -242,8 +262,35 @@ void HelloWorld::myTick(float f)
 void HelloWorld::callEveryFrame(float f)
 {
 	mytime++;
+	if (isGameOver)
+	{
+		GameOverWaitingTime++;
+	}
 	//log("시간 : %d", nNum);
-	time_label->setString(StringUtils::format(" %d ", mytime));
+	if (mytime < 10)
+	{
+		time_label->setString(StringUtils::format("00:0%d", mytime));
+	}
+	else if (mytime < 60)
+	{
+		time_label->setString(StringUtils::format("00:%d", mytime));
+	}
+	else if (mytime < 600 && (mytime % 60 < 10))
+	{
+		time_label->setString(StringUtils::format("0%d:0%d", mytime / 60, mytime % 60));
+	}
+	else if (mytime < 600 && (mytime % 60 > 10))
+	{
+		time_label->setString(StringUtils::format("0%d:%d", mytime / 60, mytime % 60));
+	}
+	else if (mytime >= 600 && (mytime % 60 > 10))
+	{
+		time_label->setString(StringUtils::format("0%d:%d", mytime / 60, mytime % 60));
+	}
+	else if (mytime >= 600 && (mytime % 60 < 10))
+	{
+		time_label->setString(StringUtils::format("0%d:%d", mytime / 60, mytime % 60));
+	}
 
 	if ((mytime % 3) == 0)
 	{
@@ -266,6 +313,18 @@ void HelloWorld::callEveryFrame(float f)
 		{
 			SkillCool = 0;
 			isSkillCoolTime = false;
+
+			this->removeChildByTag(COOL);
+            this->removeChildByTag(COOLING);
+            auto SkillButton = MenuItemImage::create("Skill.png", "Skill_Dark.png", "Skill.png", CC_CALLBACK_1(HelloWorld::SkillCallBack, this));
+            SkillButton->setAnchorPoint(Vec2(0.5, 0.5));
+            SkillButton->setScale(2);
+            auto Skill = Menu::create(SkillButton, NULL);
+            Skill->alignItemsVertically();
+            Skill->setPosition(Vec2(visibleSize.width - 180, 130));
+            Skill->setZOrder(3);
+            Skill->setTag(SKILL);
+            this->addChild(Skill);
 			log("스킬 쿨 초기화");
 		}
 	}
@@ -290,6 +349,30 @@ void HelloWorld::SkillCallBack(Ref* pSender)
 		shiledEffect->setScale(1.0f);
 		shiledEffect->setZOrder(2);
 		spr->addChild(shiledEffect);
+
+		this->removeChildByTag(SKILL);
+
+		auto skillCoolBack = Sprite::create("Skill_Dark.png");
+		skillCoolBack->setAnchorPoint(Vec2(0.5f, 0.5f));
+		skillCoolBack->setPosition(visibleSize.width - 180, 130);
+		skillCoolBack->setTag(COOL);
+		skillCoolBack->setScale(2.0f);
+		skillCoolBack->setZOrder(4);
+		this->addChild(skillCoolBack);
+
+		auto skillCool = Sprite::create("Skill.png");
+		skillCool->setAnchorPoint(Vec2(0.5f, 0.5f));
+
+		auto skillCoolTime = ProgressTimer::create(skillCool);
+		skillCoolTime->setType(ProgressTimer::Type::RADIAL);
+		skillCoolTime->setMidpoint(Vec2(0.5f, 0.5f));
+		skillCoolTime->setScale(2.0f);
+		skillCoolTime->setPosition(visibleSize.width - 180, 130);
+		skillCoolTime->setTag(COOLING);
+		skillCoolTime->setZOrder(5);
+		this->addChild(skillCoolTime);
+		auto to = ProgressTo::create(9.8f, 100);
+		skillCoolTime->runAction(to);
 	}
 
 	log("스킬 사용");
@@ -301,5 +384,6 @@ void HelloWorld::changeGameOverScene()
 	UserDefault::getInstance()->setIntegerForKey("THISSCORE", ThisScore);
 	UserDefault::getInstance()->flush();
 	Director::getInstance()->replaceScene(GameOverScene::createScene());
+	
 	log("게임오버 씬으로 이동");
 }
